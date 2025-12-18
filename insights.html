@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CloudReach | Business Insights</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f9fafb;
+      margin: 0;
+      padding: 30px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #111827;
+    }
+
+    .grid {
+      max-width: 1000px;
+      margin: 30px auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+
+    .metric {
+      font-size: 36px;
+      font-weight: 600;
+      color: #4f46e5;
+    }
+
+    .label {
+      margin-top: 8px;
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Operational Insights</h1>
+
+<div class="grid">
+  <div class="card">
+    <div class="metric" id="total">0</div>
+    <div class="label">Total Enquiries</div>
+  </div>
+
+  <div class="card">
+    <div class="metric" id="new">0</div>
+    <div class="label">New</div>
+  </div>
+
+  <div class="card">
+    <div class="metric" id="progress">0</div>
+    <div class="label">In Progress</div>
+  </div>
+
+  <div class="card">
+    <div class="metric" id="resolved">0</div>
+    <div class="label">Resolved</div>
+  </div>
+
+  <div class="card">
+    <div class="metric" id="today">0</div>
+    <div class="label">Last 24 Hours</div>
+  </div>
+
+  <div class="card">
+    <div class="metric" id="rate">0%</div>
+    <div class="label">Resolution Rate</div>
+  </div>
+</div>
+
+<footer>
+  © 2025 CloudReach Marketing
+</footer>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+  // Firebase config (same as other modules)
+  const firebaseConfig = {
+    apiKey: "AIzaSyBOfxoLauPQIGTuQOb89qHO9EzX0yxshWs",
+    authDomain: "customer-70805.firebaseapp.com",
+    projectId: "customer-70805",
+    storageBucket: "customer-70805.firebasestorage.app",
+    messagingSenderId: "288509766716",
+    appId: "1:288509766716:web:9414e5d6fa42cb2e27a739"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  db.collection("enquiries").onSnapshot(snapshot => {
+    let total = 0;
+    let newCount = 0;
+    let progressCount = 0;
+    let resolvedCount = 0;
+    let last24h = 0;
+
+    const now = new Date();
+    const cutoff = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      total++;
+
+      if (data.status === "New") newCount++;
+      if (data.status === "In Progress") progressCount++;
+      if (data.status === "Resolved") resolvedCount++;
+
+      if (data.createdAt && data.createdAt.toDate() >= cutoff) {
+        last24h++;
+      }
+    });
+
+    document.getElementById("total").textContent = total;
+    document.getElementById("new").textContent = newCount;
+    document.getElementById("progress").textContent = progressCount;
+    document.getElementById("resolved").textContent = resolvedCount;
+    document.getElementById("today").textContent = last24h;
+
+    const rate = total > 0 ? Math.round((resolvedCount / total) * 100) : 0;
+    document.getElementById("rate").textContent = rate + "%";
+  });
+</script>
+
+</body>
+</html>
